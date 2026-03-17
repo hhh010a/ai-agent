@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: ai-agent
+  profiles:
+    active: local
+server:
+  port: 8083
+  servlet:
+    context-path: /api
+# springdoc-openapi????
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.hjw.Controller
+# knife4j???????????????
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+# application.yml
+chat:
+  memory:
+    max-messages: 6
+    ttl: PT24H
