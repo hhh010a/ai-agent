@@ -18,7 +18,7 @@ class CodeGuideAppTest {
     public void chatTest(){
         String id= UUID.randomUUID().toString();
 
-        String message="你好 我是小明";
+        String message="你好 我是小红";
         codeGuideApp.chat(message,id);
 
         message="我在编程上有一些问题";
