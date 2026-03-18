@@ -29,6 +29,7 @@ public class LoggerAdvisor implements CallAdvisor, StreamAdvisor {
         ChatClientResponse chatClientResponse = callAdvisorChain.nextCall(chatClientRequest);
         this.logResponse(chatClientResponse);
         return chatClientResponse;
+
     }
 
     public Flux<ChatClientResponse> adviseStream(ChatClientRequest chatClientRequest, StreamAdvisorChain streamAdvisorChain) {
