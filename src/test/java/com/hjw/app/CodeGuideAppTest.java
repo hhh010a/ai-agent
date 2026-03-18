@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class CodeGuideAppTest {
@@ -37,5 +36,13 @@ class CodeGuideAppTest {
         String message="你好 我是小明 我最近在学习springAi";
         CodeGuideApp.CodeReport codeReport = codeGuideApp.chatWithReport(message, id);
         Assertions.assertNotNull(codeReport);
+    }
+
+
+    @Test
+    void chatWithRag() {
+        String id= UUID.randomUUID().toString();
+        String message="ConcurrentHashMap如何实现线程安全";
+        String result= codeGuideApp.chatWithRag(message, id);
     }
 }

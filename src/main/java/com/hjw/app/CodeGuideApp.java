@@ -1,12 +1,15 @@
 package com.hjw.app;
 
 import com.hjw.advisor.LoggerAdvisor;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,6 +18,7 @@ import java.util.List;
 @Slf4j
 public class CodeGuideApp {
 
+
     private final ChatClient chatClient;
 
     private static final String SYSTEM_PROMPT= """
@@ -22,8 +26,11 @@ public class CodeGuideApp {
             再逐步提供线索和原理，鼓励用户自己发现解决方案；根据用户水平调整引导深度，用积极语言激发探索欲，
             通过复述确认理解，适时给出简洁示例启发，但从不直接给完整答案；始终耐心倾听每个问题，并在对话中主动询问反馈，
             旨在培养用户的独立编程思维和能力。
+            回复精简
             """;
 
+    @Resource
+    private VectorStore codeGuideVectorStore;
 
 
     //创建chatclient
@@ -47,7 +54,6 @@ public class CodeGuideApp {
         log.info("content: {}",content);
         return content;
     }
-
     record CodeReport(String title, List<String> suggestions){}
     public CodeReport chatWithReport(String userInput ,String chatId){
         CodeReport codeReport = chatClient.prompt()
@@ -58,5 +64,17 @@ public class CodeGuideApp {
                 .entity(CodeReport.class);
         log.info("CodeReport: {}",codeReport);
         return codeReport;
+    }
+
+    public String chatWithRag(String userInput ,String chatId){
+        ChatResponse chatResponse = chatClient.prompt()
+                .user(userInput)
+                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
+                .advisors(QuestionAnswerAdvisor.builder(codeGuideVectorStore).build())
+                .call()
+                .chatResponse();
+        String content = chatResponse.getResult().getOutput().getText();
+        log.info("content: {}",content);
+        return content;
     }
 }

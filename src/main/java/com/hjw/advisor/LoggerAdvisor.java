@@ -14,10 +14,7 @@ import org.springframework.ai.chat.client.ChatClientMessageAggregator;
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
-import org.springframework.ai.chat.client.advisor.api.CallAdvisor;
-import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
-import org.springframework.ai.chat.client.advisor.api.StreamAdvisor;
-import org.springframework.ai.chat.client.advisor.api.StreamAdvisorChain;
+import org.springframework.ai.chat.client.advisor.api.*;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.model.ModelOptionsUtils;
 import org.springframework.lang.Nullable;
@@ -42,6 +39,7 @@ public class LoggerAdvisor implements CallAdvisor, StreamAdvisor {
 
     protected void logRequest(ChatClientRequest request) {
         log.info("request: {}", request.prompt().getUserMessage().getText());
+        log.info("{}",request.prompt().getContents());
     }
 
     protected void logResponse(ChatClientResponse chatClientResponse) {
@@ -53,7 +51,7 @@ public class LoggerAdvisor implements CallAdvisor, StreamAdvisor {
     }
 
     public int getOrder() {
-        return 0;
+        return 100;
     }
 
 }
