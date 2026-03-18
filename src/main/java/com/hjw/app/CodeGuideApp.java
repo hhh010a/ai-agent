@@ -5,10 +5,11 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
+import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
 
@@ -70,7 +71,12 @@ public class CodeGuideApp {
         ChatResponse chatResponse = chatClient.prompt()
                 .user(userInput)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
-                .advisors(QuestionAnswerAdvisor.builder(codeGuideVectorStore).build())
+                .advisors(RetrievalAugmentationAdvisor.builder() //自定义RagAdvisor
+                        .documentRetriever( VectorStoreDocumentRetriever //设置文档检索器
+                                .builder()
+                                .vectorStore(codeGuideVectorStore) //设置向量数据库 当前为内存存储
+                                .build() )
+                        .build())
                 .call()
                 .chatResponse();
         String content = chatResponse.getResult().getOutput().getText();
