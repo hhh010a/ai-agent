@@ -27,6 +27,14 @@ class CodeGuideAppTest {
         codeGuideApp.chat(message,id);
     }
 
+    @Test
+    public void chatTest1(){
+        String id= UUID.randomUUID().toString();
+
+        String message="你好啊啊啊啊啊 你是谁哈哈哈哈哈哈哈";
+        codeGuideApp.chat(message,id);
+
+    }
 
 
     @Test
@@ -42,7 +50,7 @@ class CodeGuideAppTest {
     @Test
     void chatWithRag() {
         String id= UUID.randomUUID().toString();
-        String message="ConcurrentHashMap如何实现线程安全";
+        String message="JVM内存模型是如何划分的？";
         String result= codeGuideApp.chatWithRag(message, id);
     }
 }

@@ -1,6 +1,7 @@
 package com.hjw.app;
 
 import com.hjw.advisor.LoggerAdvisor;
+import com.hjw.rag.QueryRewriter;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -9,8 +10,10 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
+import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter;
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -33,6 +36,8 @@ public class CodeGuideApp {
     @Resource
     private VectorStore codeGuideVectorStore;
 
+    @Resource
+    private QueryRewriter queryRewriter;
 
     //创建chatclient
     public CodeGuideApp(ChatModel  dashscopeChatModel, ChatMemory redisChatMemory){
@@ -46,6 +51,7 @@ public class CodeGuideApp {
     }
 
     public String chat(String userInput ,String chatId){
+        userInput = queryRewriter.rewrite(userInput);
         ChatResponse chatResponse = chatClient.prompt()
                 .user(userInput)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
@@ -57,6 +63,7 @@ public class CodeGuideApp {
     }
     record CodeReport(String title, List<String> suggestions){}
     public CodeReport chatWithReport(String userInput ,String chatId){
+        userInput = queryRewriter.rewrite(userInput);
         CodeReport codeReport = chatClient.prompt()
                 .user(userInput)
                 .system(SYSTEM_PROMPT + "对话结束后 生成一个报告 标题为{用户名}的编程报告 内容为编程学习建议列表")
@@ -68,14 +75,21 @@ public class CodeGuideApp {
     }
 
     public String chatWithRag(String userInput ,String chatId){
+        userInput = queryRewriter.rewrite(userInput);
         ChatResponse chatResponse = chatClient.prompt()
                 .user(userInput)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
                 .advisors(RetrievalAugmentationAdvisor.builder() //自定义RagAdvisor
                         .documentRetriever( VectorStoreDocumentRetriever //设置文档检索器
                                 .builder()
-                                .vectorStore(codeGuideVectorStore) //设置向量数据库 当前为内存存储
+                                .vectorStore(codeGuideVectorStore) //设置向量数据库
+                                .filterExpression(new FilterExpressionBuilder() //设置过滤器
+                                        .eq("level", "高级") //
+                                        .build())
                                 .build() )
+                        .queryAugmenter(ContextualQueryAugmenter.builder()
+                                .allowEmptyContext(true)  //允许上下文为空 检索为空也能回答
+                                .build())
                         .build())
                 .call()
                 .chatResponse();
@@ -83,4 +97,5 @@ public class CodeGuideApp {
         log.info("content: {}",content);
         return content;
     }
+
 }

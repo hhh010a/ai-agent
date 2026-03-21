@@ -25,13 +25,16 @@ class MyMarkdownReader {
         try{
             Resource[] resources = resourcePatternResolver.getResources("classpath:document/*.md");
             String fileName;
+            String level;
             for (Resource resource : resources){
                 fileName = resource.getFilename();
+                level = fileName.substring(fileName.length()-7,fileName.length()-5);
                 MarkdownDocumentReaderConfig config = MarkdownDocumentReaderConfig.builder()
                         .withHorizontalRuleCreateDocument(true)
                         .withIncludeCodeBlock(false)
                         .withIncludeBlockquote(false)
                         .withAdditionalMetadata("filename", fileName)
+                        .withAdditionalMetadata("level",level)
                         .build();
                 MarkdownDocumentReader reader = new MarkdownDocumentReader(resource, config);
                 documents.addAll(reader.get());
