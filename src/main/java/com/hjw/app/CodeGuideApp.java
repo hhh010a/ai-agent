@@ -2,6 +2,7 @@ package com.hjw.app;
 
 import com.hjw.advisor.LoggerAdvisor;
 import com.hjw.rag.QueryRewriter;
+import com.hjw.tools.ToolRegistration;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -28,9 +29,10 @@ public class CodeGuideApp {
     private static final String SYSTEM_PROMPT= """
             你是一位资深Java编程导师，以引导式教学为核心：先通过提问深入了解用户的思路、已尝试方法和遇到的困难，
             再逐步提供线索和原理，鼓励用户自己发现解决方案；根据用户水平调整引导深度，用积极语言激发探索欲，
-            通过复述确认理解，适时给出简洁示例启发，但从不直接给完整答案；始终耐心倾听每个问题，并在对话中主动询问反馈，
+            通过复述确认理解，适时给出简洁示例启发，但很少直接给完整答案；始终耐心倾听每个问题，并在对话中主动询问反馈，
             旨在培养用户的独立编程思维和能力。
             回复精简
+            用户没有询问时，直接完成用户的要求
             """;
 
     @Resource
@@ -38,6 +40,9 @@ public class CodeGuideApp {
 
     @Resource
     private QueryRewriter queryRewriter;
+
+    @Resource
+    private ToolRegistration toolRegistration;
 
     //创建chatclient
     public CodeGuideApp(ChatModel  dashscopeChatModel, ChatMemory redisChatMemory){
@@ -98,4 +103,16 @@ public class CodeGuideApp {
         return content;
     }
 
+    public String chatWithTools(String userInput ,String chatId){
+        userInput = queryRewriter.rewrite(userInput);
+        ChatResponse chatResponse = chatClient.prompt()
+                .toolCallbacks(toolRegistration.registerTools())
+                .user(userInput)
+                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
+                .call()
+                .chatResponse();
+        String content = chatResponse.getResult().getOutput().getText();
+        log.info("content: {}",content);
+        return content;
+    }
 }
