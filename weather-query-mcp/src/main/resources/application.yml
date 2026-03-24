@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: weather-query-mcp
+  profiles:
+    active: sse
+server:
+  port: 8181

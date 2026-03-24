@@ -1,0 +1,10 @@
+# Using spring-ai-starter-mcp-server
+spring:
+  ai:
+    mcp:
+      server:
+        name: weather-query-mcp
+        stdio: true
+  main:
+    web-application-type: none
+    banner-mode: off

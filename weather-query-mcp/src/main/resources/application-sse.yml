@@ -1,0 +1,7 @@
+# Using spring-ai-starter-mcp-server-webmvc
+spring:
+  ai:
+    mcp:
+      server:
+        name: weather-query-mcp
+        stdio: false

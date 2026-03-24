@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "weather-query": {
+      "command": "D:/JAVA/bin/java",
+      "args": [
+        "-Dspring.ai.mcp.server.stdio=true",
+        "-Dspring.main.web-application-type=none",
+        "-Dlogging.pattern.console=",
+        "-jar",
+        "weather-query-mcp/target/weather-query-mcp-0.0.1-SNAPSHOT.jar"
+      ],
+      "env": {}
+    }
+  }
+}

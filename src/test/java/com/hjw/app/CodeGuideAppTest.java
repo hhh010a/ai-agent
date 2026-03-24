@@ -101,4 +101,13 @@ class CodeGuideAppTest {
         System.out.println("组合调用结果: " + result6);
         Assertions.assertNotNull(result6);
     }
+
+
+    @Test
+    void chatWithMcp() {
+        String id = UUID.randomUUID().toString();
+        String message = "北京今天的天气怎么样";
+        String result = codeGuideApp.chatWithMcp(message, id);
+        System.out.println(result);
+    }
 }

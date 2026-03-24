@@ -3,6 +3,18 @@ spring:
     name: ai-agent
   profiles:
     active: local
+  ai:
+    mcp:
+      client:
+        request-timeout: 60s
+#        stdio:
+#          servers-configuration: classpath:mcp-servers.json
+        sse:
+          connections:
+            server1:
+              url: http://localhost:8181
+
+
 server:
   port: 8083
   servlet:

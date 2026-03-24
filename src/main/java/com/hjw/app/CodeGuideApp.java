@@ -13,6 +13,7 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
 import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter;
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.stereotype.Component;
@@ -43,6 +44,9 @@ public class CodeGuideApp {
 
     @Resource
     private ToolRegistration toolRegistration;
+
+    @Resource
+    private ToolCallbackProvider toolCallbackProvider;
 
     //创建chatclient
     public CodeGuideApp(ChatModel  dashscopeChatModel, ChatMemory redisChatMemory){
@@ -107,6 +111,19 @@ public class CodeGuideApp {
         userInput = queryRewriter.rewrite(userInput);
         ChatResponse chatResponse = chatClient.prompt()
                 .toolCallbacks(toolRegistration.registerTools())
+                .user(userInput)
+                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
+                .call()
+                .chatResponse();
+        String content = chatResponse.getResult().getOutput().getText();
+        log.info("content: {}",content);
+        return content;
+    }
+
+    public String chatWithMcp(String userInput ,String chatId){
+        userInput = queryRewriter.rewrite(userInput);
+        ChatResponse chatResponse = chatClient.prompt()
+                .toolCallbacks(toolCallbackProvider)
                 .user(userInput)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
                 .call()
