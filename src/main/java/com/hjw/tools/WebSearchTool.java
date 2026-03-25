@@ -10,11 +10,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 
-@Component
 public class WebSearchTool {
 
-    @Value("${tool.websearch.api-key}")
-    private String key;
+
+    private final String key;
+
+    public WebSearchTool(String  key){
+        this.key = key;
+    }
 
     @Tool(description = "Web search tool")
     public String search(@ToolParam(description = "Query to search for") String query){

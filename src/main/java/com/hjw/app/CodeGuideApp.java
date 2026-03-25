@@ -24,7 +24,6 @@ import java.util.List;
 @Slf4j
 public class CodeGuideApp {
 
-
     private final ChatClient chatClient;
 
     private static final String SYSTEM_PROMPT= """
@@ -58,7 +57,6 @@ public class CodeGuideApp {
                 .defaultSystem(SYSTEM_PROMPT)
                 .build();
     }
-
     public String chat(String userInput ,String chatId){
         userInput = queryRewriter.rewrite(userInput);
         ChatResponse chatResponse = chatClient.prompt()

@@ -7,8 +7,8 @@ import org.springframework.ai.tool.annotation.ToolParam;
 
 public class WebScrapingTool {
 
-    @Tool(description = "Web scraping ")
-    public String webScraping(@ToolParam(description = "URL to scrape") String url){
+    @Tool(description = "Crawl the content of the specified webpage and extract information such as the page title and body text ")
+    public String webScraping(@ToolParam(description = "The complete URL of the webpage to be crawled") String url){
         try {
             return Jsoup.connect( url).get().toString();
         } catch (Exception e) {

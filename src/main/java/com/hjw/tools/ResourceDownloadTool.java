@@ -8,9 +8,9 @@ import org.springframework.ai.tool.annotation.ToolParam;
 
 public class ResourceDownloadTool {
 
-    @Tool(description = " resource download")
-    public String resourceDownload(@ToolParam(description = "resource url") String url,
-                                   @ToolParam(description = "file name") String fileName){
+    @Tool(description = " Download the resource file from the specified URL to the local system")
+    public String resourceDownload(@ToolParam(description = "The complete URL of the resource file") String url,
+                                   @ToolParam(description = "The name of the resource file") String fileName){
         String fileDir=FileConstant.FILE_PATH + "/download";
         String filePath = fileDir+ "/"+fileName;
         try {
