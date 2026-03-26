@@ -56,11 +56,11 @@ public class ToolCallAgent extends ReActAgent{
             AssistantMessage assistantMessage = chatResponse.getResult().getOutput();
 
             List<AssistantMessage.ToolCall> toolCalls = assistantMessage.getToolCalls();
-            log.info("ai think: {}",assistantMessage.getText());
-            String toolCallInfo = toolCalls.stream()
-                    .map(toolCall -> "name:" + toolCall.name() + ", 参数：" + toolCall.arguments())
-                    .collect(Collectors.joining("\n"));
-            log.info("toolcall info: {}",toolCallInfo);
+//            log.info("ai think: {}",assistantMessage.getText());
+//            String toolCallInfo = toolCalls.stream()
+//                    .map(toolCall -> "name:" + toolCall.name() + ", 参数：" + toolCall.arguments())
+//                    .collect(Collectors.joining("\n"));
+//            log.info("toolcall info: {}",toolCallInfo);
 
             if(toolCalls.isEmpty()){
                 getMessageList().add(assistantMessage);

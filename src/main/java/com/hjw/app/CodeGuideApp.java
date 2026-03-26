@@ -17,7 +17,10 @@ import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import reactor.core.publisher.Flux;
 
+import java.io.IOException;
 import java.util.List;
 
 @Component
@@ -129,5 +132,15 @@ public class CodeGuideApp {
         String content = chatResponse.getResult().getOutput().getText();
         log.info("content: {}",content);
         return content;
+    }
+
+    public Flux< String> chatByStream(String userInput , String chatId){
+        userInput = queryRewriter.rewrite(userInput);
+        return chatClient.prompt()
+                .user(userInput)
+                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
+                .stream()
+                .content();
+
     }
 }
