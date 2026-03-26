@@ -44,7 +44,7 @@ public abstract class BaseAgent {
         List<String> results = new ArrayList<>();
 
         try {
-            for (int i = 0; i < MaxStep && state != State.FINISHED; i++) {
+            for (int i = 1; i <=MaxStep && state != State.FINISHED; i++) {
                 currentStep = i;
                 String result = step();
                 log.info("step" + currentStep + ":" + result);
@@ -85,7 +85,7 @@ public abstract class BaseAgent {
             try {  //异步执行无返回值  防止堵塞
                 for (int i = 1; i <= MaxStep && state != State.FINISHED; i++) {
                     currentStep = i;
-                    String result = "step" + currentStep + ":" + step();
+                    String result = "step" + currentStep + ":" + step()+"\n";
                     log.info( result);
                     emitter.send(result);
                 }

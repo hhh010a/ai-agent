@@ -42,7 +42,7 @@ public class ToolCallAgent extends ReActAgent{
 
     }
 
-    public boolean think(){
+    public String think(){
         if(getNextStepPrompt()!=null&&!getNextStepPrompt().isEmpty()){
             getMessageList().add(new UserMessage(getNextStepPrompt()));
         }
@@ -64,13 +64,13 @@ public class ToolCallAgent extends ReActAgent{
 
             if(toolCalls.isEmpty()){
                 getMessageList().add(assistantMessage);
-                return false;
+                return "思考:"+assistantMessage.getText();
             }else{
-                return true;
+                return "思考:"+assistantMessage.getText()+"\n"+act();
             }
         } catch (Exception e) {
             getMessageList().add(new AssistantMessage("思考时遇到问题"+e.getMessage()));
-            return false;
+            return "思考时遇到问题"+e.getMessage();
         }
     }
 
@@ -82,12 +82,13 @@ public class ToolCallAgent extends ReActAgent{
         setMessageList(toolExecutionResult.conversationHistory());
         ToolResponseMessage toolResponseMessage =(ToolResponseMessage) toolExecutionResult.conversationHistory()
                 .getLast();
+        if(toolResponseMessage.getResponses().stream().anyMatch(toolResponse -> toolResponse.name().equals("terminate"))){
+            setState(State.FINISHED);
+            return "回答已结束";
+        }
         String result = toolResponseMessage.getResponses().stream()
                 .map(toolResponse -> "工具名称：" + toolResponse.name() + ",工具结果：" + toolResponse.responseData())
                 .collect(Collectors.joining("\n"));
-        if(toolResponseMessage.getResponses().stream().anyMatch(toolResponse -> toolResponse.name().equals("terminate"))){
-            setState(State.FINISHED);
-        }
         return result;
     }
 }
