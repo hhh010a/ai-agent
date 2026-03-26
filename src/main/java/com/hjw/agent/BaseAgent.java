@@ -66,12 +66,12 @@ public abstract class BaseAgent {
         SseEmitter emitter = new SseEmitter(240000L);
         try {
             if (state != State.IDLE) {
-                emitter.send("Can't start running with this state:" + this.state);
+                emitter.send("无法从当前状态开始运行：" + this.state);
                 emitter.complete();
                 return emitter;
             }
             if (StrUtil.isBlank(userPrompt)) {
-                emitter.send("userPrompt can't be empty");
+                emitter.send("用户输入不能为空");
                 emitter.complete();
                 return emitter;
             }
@@ -85,20 +85,20 @@ public abstract class BaseAgent {
             try {  //异步执行无返回值  防止堵塞
                 for (int i = 1; i <= MaxStep && state != State.FINISHED; i++) {
                     currentStep = i;
-                    String result = step();
-                    log.info("step" + currentStep + ":" + result);
+                    String result = "step" + currentStep + ":" + step();
+                    log.info( result);
                     emitter.send(result);
                 }
                 if (currentStep >= MaxStep) {
                     state = State.FINISHED;
-                    emitter.send("MaxStep reached :" + MaxStep);
+                    emitter.send("达到最大可执行步数:" + MaxStep);
                     emitter.complete();
                 }
                 emitter.complete();
             } catch (Exception e) {
                 state = State.ERROR;
                 try {
-                    emitter.send("Error in agent:" + agentName + "\n" + e.getMessage());
+                    emitter.send("agent发生错误:" + agentName + "\n" + e.getMessage());
                 } catch (IOException ex) {
                     emitter.completeWithError(ex);
                 }
