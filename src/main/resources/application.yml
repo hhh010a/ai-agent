@@ -7,12 +7,12 @@ spring:
     mcp:
       client:
         request-timeout: 60s
-#        stdio:
-#          servers-configuration: classpath:mcp-servers.json
-        sse:
-          connections:
-            server1:
-              url: http://localhost:8181
+        stdio:
+          servers-configuration: classpath:mcp-servers.json
+#        sse:
+#          connections:
+#            server1:
+#              url: http://localhost:8181
 
 
 server:

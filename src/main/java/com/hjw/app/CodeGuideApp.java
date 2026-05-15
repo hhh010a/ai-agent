@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
 
-import java.io.IOException;
 import java.util.List;
 
 @Component
@@ -93,15 +92,15 @@ public class CodeGuideApp {
                         .documentRetriever( VectorStoreDocumentRetriever //设置文档检索器
                                 .builder()
                                 .vectorStore(codeGuideVectorStore) //设置向量数据库
-                                .filterExpression(new FilterExpressionBuilder() //设置过滤器
-                                        .eq("level", "高级") //
-                                        .build())
-                                .build() )
+                                .topK(3) //返回前5个最相关文档
+                                .similarityThreshold(0.7) //相似度阈值，低于0.7的文档被过滤
+                                .build())
                         .queryAugmenter(ContextualQueryAugmenter.builder()
                                 .allowEmptyContext(true)  //允许上下文为空 检索为空也能回答
                                 .build())
                         .build())
                 .call()
+
                 .chatResponse();
         String content = chatResponse.getResult().getOutput().getText();
         log.info("content: {}",content);

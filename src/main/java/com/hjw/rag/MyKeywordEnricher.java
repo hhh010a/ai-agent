@@ -15,7 +15,7 @@ class MyKeywordEnricher {
     private  ChatModel dashScopeChatModel;
     List<Document> enrichDocuments(List<Document> documents) {
         KeywordMetadataEnricher enricher = KeywordMetadataEnricher.builder(dashScopeChatModel)
-                .keywordCount(5)
+                .keywordCount(4)
                 .build();
 
 
