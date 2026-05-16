@@ -110,4 +110,34 @@ class CodeGuideAppTest {
         String result = codeGuideApp.chatWithMcp(message, id);
         System.out.println(result);
     }
+
+    @Test
+    void chatWithMemory() {
+        String id = UUID.randomUUID().toString();
+
+        System.out.println("=== 测试 chatWithMemory - 1===");
+        String message1 = "你好，我叫张三，我正在学习Java";
+        codeGuideApp.chatWithMemory(message1, id);
+
+
+        System.out.println("\n=== 测试 chatWithMemory - 2 ===");
+        String message2 = "我住在北京";
+        codeGuideApp.chatWithMemory(message2, id);
+
+
+        System.out.println("\n=== 测试 chatWithMemory - 3 ===");
+        String message3 = "今天我有点难受";
+        codeGuideApp.chatWithMemory(message3, id);
+
+
+        System.out.println("=== 测试 chatWithMemory - 4===");
+        String message4 = "今天有点开心";
+        codeGuideApp.chatWithMemory(message4, id);
+
+
+//        System.out.println("=== 测试 chatWithMemory - 5 ===");
+//        String message5 = "今天有点伤心";
+//        codeGuideApp.chatWithMemory(message5, id);
+
+    }
 }

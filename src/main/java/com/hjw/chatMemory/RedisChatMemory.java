@@ -2,6 +2,8 @@ package com.hjw.chatMemory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hjw.chatMemory.service.EpisodicMemoryCompressionService;
+import jakarta.annotation.Resource;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.*;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -18,6 +20,9 @@ public class RedisChatMemory implements ChatMemory {
     private final ObjectMapper objectMapper;
     private final int maxMessages;
     private final Duration ttl;
+
+    @Resource
+    private EpisodicMemoryCompressionService compressionService;
 
     public RedisChatMemory(StringRedisTemplate stringRedisTemplate, ObjectMapper objectMapper, int maxMessages, Duration ttl) {
         this.stringRedisTemplate = stringRedisTemplate;
@@ -44,6 +49,13 @@ public class RedisChatMemory implements ChatMemory {
             }
             if(storedMessageList.size()>maxMessages){
                 storedMessageList = storedMessageList.subList(storedMessageList.size()-maxMessages,storedMessageList.size());
+            }
+
+            if (storedMessageList.size() >= 10) {
+                List<Message> allMessages = storedMessageList.stream()
+                        .map(this::toMessage)
+                        .collect(Collectors.toList());
+                compressionService.compressAndStore(conversationId, allMessages);
             }
             stringRedisTemplate.opsForValue().set(key,objectMapper.writeValueAsString(storedMessageList),ttl);
         }catch (Exception e){

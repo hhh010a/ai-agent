@@ -1,6 +1,7 @@
 package com.hjw.app;
 
 import com.hjw.advisor.LoggerAdvisor;
+import com.hjw.chatMemory.service.EpisodicMemoryRetrievalService;
 import com.hjw.rag.QueryRewriter;
 import com.hjw.tools.ToolRegistration;
 import jakarta.annotation.Resource;
@@ -10,6 +11,7 @@ import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
 import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter;
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
@@ -34,7 +36,6 @@ public class CodeGuideApp {
             通过复述确认理解，适时给出简洁示例启发，但很少直接给完整答案；始终耐心倾听每个问题，并在对话中主动询问反馈，
             旨在培养用户的独立编程思维和能力。
             回复精简
-            用户没有询问时，直接完成用户的要求
             """;
 
     @Resource
@@ -48,6 +49,9 @@ public class CodeGuideApp {
 
     @Resource
     private ToolCallbackProvider toolCallbackProvider;
+
+    @Resource
+    private EpisodicMemoryRetrievalService memoryRetrievalService;
 
     //创建chatclient
     public CodeGuideApp(ChatModel  dashscopeChatModel, ChatMemory redisChatMemory){
@@ -141,5 +145,42 @@ public class CodeGuideApp {
                 .stream()
                 .content();
 
+    }
+
+    public String chatWithMemory(String userInput, String chatId) {
+
+        List<Document> memories = memoryRetrievalService.recallAndRank(userInput, chatId, 3);
+
+        String systemPromptWithMemory = buildSystemPromptWithMemory(SYSTEM_PROMPT, memories);
+
+        ChatResponse chatResponse = chatClient.prompt()
+                .user(userInput)
+                .system(systemPromptWithMemory)
+                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
+                .call()
+                .chatResponse();
+
+        if (!memories.isEmpty()) {
+            memoryRetrievalService.updateAccessTime(memories);
+        }
+
+        String content = chatResponse.getResult().getOutput().getText();
+        log.info("content: {}", content);
+        return content;
+    }
+
+    private String buildSystemPromptWithMemory(String basePrompt, List<Document> memories) {
+        if (memories.isEmpty()) {
+            return basePrompt;
+        }
+
+        StringBuilder memoryContext = new StringBuilder("\n\n【相关历史记忆】：\n");
+        for (int i = 0; i < memories.size(); i++) {
+            Document doc = memories.get(i);
+            memoryContext.append(String.format("%d. %s\n", i+1, doc.getText()));
+        }
+        memoryContext.append("\n请根据以上记忆和用户当前问题进行回答。");
+
+        return basePrompt + memoryContext;
     }
 }

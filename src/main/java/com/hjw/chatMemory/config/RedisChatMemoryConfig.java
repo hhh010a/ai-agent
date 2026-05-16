@@ -1,6 +1,7 @@
-package com.hjw.chatMemory;
+package com.hjw.chatMemory.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hjw.chatMemory.RedisChatMemory;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
