@@ -17,23 +17,25 @@ import java.util.stream.Collectors;
 public class EpisodicMemoryRetrievalService {
 
     private final VectorStore vectorStore;
+    private final EpisodicMemoryForgettingService forgettingService;
 
-    //衰减系数 越大遗忘越快
     private static final double DECAY_LAMBDA = 0.01;
 
-    public EpisodicMemoryRetrievalService(VectorStore vectorStore) {
+    public EpisodicMemoryRetrievalService(VectorStore vectorStore,
+                                           EpisodicMemoryForgettingService forgettingService) {
         this.vectorStore = vectorStore;
+        this.forgettingService = forgettingService;
     }
 
     public List<Document> recallAndRank(String query, String conversationId, int topK) {
-        // 1. 向量语义搜索 + 元数据筛选
         List<Document> rawResults = semanticSearch(query, conversationId);
         if (rawResults.isEmpty()) {
             return Collections.emptyList();
         }
 
-        // 2. 衰减重排序
-        return rerankByDecay(rawResults, topK);
+        List<Document> ranked = rerankByDecay(rawResults, topK);
+
+        return forgettingService.filterForgottenMemories(ranked);
     }
 
 
